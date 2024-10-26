@@ -41,38 +41,31 @@ class StudentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id):View
-    {
-        $student = Student::find($id);
-        return view('students.show')->with('students', $student);
-    }
+    public function show(Student $student): View
+{
+    return view('students.show')->with('students', $student);
+}
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $student = Student::find($id);
-        return view('students.edit')->with('students', $student);
-    }
+public function edit(Student $student): View
+{
+    return view('students.edit')->with('students', $student);
+}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id):RedirectResponse
-    {
-        $student= Student::find($id);
-        $input = $request->all();
-        $student->update($input);
-        return redirect('students')->with('success','Student Updated');
-    }
+public function update(Request $request, Student $student): RedirectResponse
+{
+    $validatedData = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:students,email,'.$student->id,
+        // Additional fields
+    ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id):RedirectResponse
-    {
-        $student= Student::destroy($id);
-        return redirect('students')->with('success','Student Deleted');
-    }
+    $student->update($validatedData);
+    return redirect('students')->with('success', 'Student Updated');
+}
+
+public function destroy(Student $student): RedirectResponse
+{
+    $student->delete();
+    return redirect('students')->with('success', 'Student Deleted');
+}
 }
